@@ -46,12 +46,19 @@ namespace KendoUIMVC5.Controllers
 
         public ActionResult Index()
         {
-            return View(_references.Read("Countries"));
+            return Display("Countries");
         }
 
-        public ActionResult About()
+        public ActionResult GetTables()
         {
-            return View();
+            var tables = new String[] { "Countries", "xyz" };
+            return Json(tables, JsonRequestBehavior.AllowGet);
+        }
+
+        public ActionResult Display(string tableName)
+        {
+            var model = new ReferenceTablesModel() { DataTable = _references.Read(tableName) };
+            return View(model);
         }
 
         public ActionResult Read([DataSourceRequest] DataSourceRequest request)
@@ -97,5 +104,12 @@ namespace KendoUIMVC5.Controllers
                 return this.Json(new DataSourceResult() { Errors = ex.Message });
             }
         }
+    }
+
+    public class ReferenceTablesModel
+    {
+        public DataTable DataTable { get; set; }
+
+        public string SelectedTableName { get; set; }
     }
 }

@@ -1,11 +1,23 @@
-﻿@model System.Data.DataTable
+﻿@model KendoUIMVC5.Controllers.ReferenceTablesModel
+
+@(Html.Kendo().DropDownListFor(model => model.SelectedTableName)
+          .Name("cboListOfReferenceTables")
+          .DataSource(source =>
+          {
+              source.Read(read =>
+              {
+                  read.Action("GetTables", "Home");
+              });
+          })
+         .HtmlAttributes(new { style = "width: 100%" })
+)
 
 @(Html.Kendo().Grid<dynamic>()
-    .Name("MyTableOfReferences")
+    .Name("gridReferenceTableContent")
     .Columns(columns =>
     {
         // Format Date and Boolean
-        foreach (System.Data.DataColumn column in Model.Columns)
+        foreach (System.Data.DataColumn column in Model.DataTable.Columns)
         {
             var boundedColumn = columns.Bound(column.ColumnName);
 
@@ -28,9 +40,9 @@
         .Ajax()
         .Model(model =>
         {
-            var id = Model.PrimaryKey[0].ColumnName;
+            var id = Model.DataTable.PrimaryKey[0].ColumnName;
             model.Id(id);
-            foreach (System.Data.DataColumn column in Model.Columns)
+            foreach (System.Data.DataColumn column in Model.DataTable.Columns)
             {
                 if (column.ColumnName == id)
                 {
@@ -57,7 +69,7 @@
             alert("Generic server error.");
         }
         // cancel grid rebind if error occurs
-        var grid = $("#MyTableOfReferences").data("kendoGrid");
+        var grid = $("#gridReferenceTableContent").data("kendoGrid");
         grid.one("dataBinding", function (e) {
             e.preventDefault();
         });
@@ -66,21 +78,21 @@
     function onEdit(e) {
         // In Edit mode, disable all primary key field
         if (!e.model.isNew()) {
-            @foreach (var key in Model.PrimaryKey) {
+            @foreach (var key in Model.DataTable.PrimaryKey) {
                 @: document.getElementsByName('@key')[0].setAttribute('readonly', 'readonly');
-                                    }
+                                                }
         }
 
         // Define default empty value (except for primary key)
         if (e.model.isNew()) {
-            @foreach (System.Data.DataColumn col in Model.Columns)
+            @foreach (System.Data.DataColumn col in Model.DataTable.Columns)
             {
                 @: e.model.set('@col.ColumnName', '');
-                                                }
+                                                            }
         }
     }
 
     $(document).ready(function () {
-        var grid = $("#MyTableOfReferences").data("kendoGrid").bind("edit", onEdit);
+        var grid = $("#gridReferenceTableContent").data("kendoGrid").bind("edit", onEdit);
     });
 </script>
