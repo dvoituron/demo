@@ -1,0 +1,46 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<tables>
+  <!-- Define a table.name to display in the UI -->
+  <!-- Use column names (or aliases) from the SELECT command, into the UPDATE, INSERT OR DELETE commands as parameters -->
+  <table name="Countries">
+    <identifier>CountryCode</identifier>
+    <select>
+      SELECT Code AS CountryCode, en.Label AS English, fr.Label AS French, nl.Label AS Dutch
+      FROM Country
+      FULL JOIN CountryTranslate AS en ON en.CountryCode = Country.Code AND en.LanguageCode = 'en' AND en.DeletedDate IS NULL
+      FULL JOIN CountryTranslate AS fr ON fr.CountryCode = Country.Code AND fr.LanguageCode = 'fr' AND fr.DeletedDate IS NULL
+      FULL JOIN CountryTranslate AS nl ON nl.CountryCode = Country.Code AND nl.LanguageCode = 'nl' AND nl.DeletedDate IS NULL
+      WHERE Country.DeletedDate IS NULL AND Code IS NOT NULL
+    </select>
+    <update>
+      UPDATE CountryTranslate SET Label = @English WHERE CountryCode = @CountryCode AND LanguageCode = 'EN' AND DeletedDate IS NULL
+      UPDATE CountryTranslate SET Label = @French  WHERE CountryCode = @CountryCode AND LanguageCode = 'FR' AND DeletedDate IS NULL
+      UPDATE CountryTranslate SET Label = @Dutch   WHERE CountryCode = @CountryCode AND LanguageCode = 'NL' AND DeletedDate IS NULL
+    </update>
+    <delete>
+      UPDATE Country SET DeletedDate = GETDATE() WHERE Code = @CountryCode
+      UPDATE CountryTranslate SET DeletedDate = GETDATE() WHERE CountryCode = @CountryCode
+    </delete>
+    <!-- IF @@ROWCOUNT=0... https://blogs.msdn.microsoft.com/miah/2008/02/17/sql-if-exists-update-else-insert/ -->
+    <insert>
+      UPDATE Country SET DeletedDate = NULL WHERE Code = @CountryCode
+      IF @@ROWCOUNT=0
+      INSERT INTO Country (Code, CreatedBy) VALUES(@CountryCode, 'Admin')
+
+      -- Insert or update the english label
+      UPDATE CountryTranslate SET Label = @English, DeletedDate = NULL WHERE CountryCode = @CountryCode AND LanguageCode = 'EN'
+      IF @@ROWCOUNT=0
+      INSERT INTO CountryTranslate (CountryCode, Label, LanguageCode, CreatedBy) VALUES(@CountryCode, @English, 'EN', 'Admin')
+
+      -- Insert or update the french label
+      UPDATE CountryTranslate SET Label = @French, DeletedDate = NULL WHERE CountryCode = @CountryCode AND LanguageCode = 'FR'
+      IF @@ROWCOUNT=0
+      INSERT INTO CountryTranslate (CountryCode, Label, LanguageCode, CreatedBy) VALUES(@CountryCode, @French,  'FR', 'Admin')
+
+      -- Insert or update the dutch label
+      UPDATE CountryTranslate SET Label = @Dutch, DeletedDate = NULL WHERE CountryCode = @CountryCode AND LanguageCode = 'NL'
+      IF @@ROWCOUNT=0
+      INSERT INTO CountryTranslate (CountryCode, Label, LanguageCode, CreatedBy) VALUES(@CountryCode, @Dutch,   'NL', 'Admin')
+    </insert>
+  </table>  
+</tables>
