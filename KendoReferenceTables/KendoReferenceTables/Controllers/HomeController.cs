@@ -21,21 +21,6 @@ namespace KendoUIMVC5.Controllers
         ReferenceTables _references = new ReferenceTables()
         {
             ConnectionString = "Server=(localdb)\\ProjectsV12;Database=TrasysSkillsManager;Trusted_Connection=True;",
-            //Table = new TableDefinition[]
-            // {
-            //     new TableDefinition()
-            //     {
-            //         Name = "Employees",
-            //         SelectCommand = "SELECT French.CountryCode, French.Label AS French, English.Label AS English, Dutch.Label AS Dutch " +
-            //                         "FROM       (SELECT CountryCode, Label FROM CountryTranslate WHERE LanguageCode = 'FR') AS French " +
-            //                         "INNER JOIN (SELECT CountryCode, Label FROM CountryTranslate WHERE LanguageCode = 'EN') AS English ON French.CountryCode = English.CountryCode " +
-            //                         "INNER JOIN (SELECT CountryCode, Label FROM CountryTranslate WHERE LanguageCode = 'NL') AS Dutch   ON Dutch.CountryCode = English.CountryCode",
-            //         Identifiers = new string[] { "CountryCode" },
-            //         UpdateCommands = new string[] { "UPDATE EMP SET EMPNO = @empno, ENAME = @ename, JOB = @Job, MGR = @Mgr, HIREDATE = CONVERT(datetime, @Hiredate, 103), SAL = @Sal, COMM = NULLIF(@Comm, ''), DEPTNO = @Deptno, TestB = @TestB WHERE empno = @empno" },
-            //         DeleteCommands = new string[] { "DELETE FROM EMP WHERE EMPNO = @empno" },
-            //         InsertCommands = new string[] { "INSERT INTO EMP (ENAME, JOB, DEPTNO) VALUES (@ename, @Job, @deptno)" }
-            //     }
-            // }
         };
 
         protected override void Initialize(RequestContext requestContext)
@@ -44,33 +29,31 @@ namespace KendoUIMVC5.Controllers
             base.Initialize(requestContext);
         }
 
+        public ActionResult GetAllTables()
+        {
+            return Json(_references.Table.Select(t => t.Name), JsonRequestBehavior.AllowGet);
+        }
+
         public ActionResult Index()
         {
-            return Display("Countries");
-        }
-
-        public ActionResult GetTables()
-        {
-            var tables = new String[] { "Countries", "xyz" };
-            return Json(tables, JsonRequestBehavior.AllowGet);
-        }
-
-        public ActionResult Display(string tableName)
-        {
-            var model = new ReferenceTablesModel() { DataTable = _references.Read(tableName) };
+            var model = new ReferenceTablesModel()
+            {
+                SelectedTableName = this.SelectedTableName,
+                DataTable = _references.Read(this.SelectedTableName)
+            };
             return View(model);
         }
 
-        public ActionResult Read([DataSourceRequest] DataSourceRequest request)
+        public ActionResult Read([DataSourceRequest] DataSourceRequest request, string tableName)
         {
-            return Json(_references.Read("Countries").ToDataSourceResult(request));
+            return Json(_references.Read(tableName).ToDataSourceResult(request));
         }
 
-        public ActionResult Update([DataSourceRequest] DataSourceRequest request)
+        public ActionResult Update([DataSourceRequest] DataSourceRequest request, string tableName)
         {
             try
             {
-                _references.Update("Countries", Request.Form);
+                _references.Update(tableName, Request.Form);
                 return Json(ModelState.ToDataSourceResult());
             }
             catch (Exception ex)
@@ -79,11 +62,11 @@ namespace KendoUIMVC5.Controllers
             }            
         }
 
-        public ActionResult Delete([DataSourceRequest] DataSourceRequest request)
+        public ActionResult Delete([DataSourceRequest] DataSourceRequest request, string tableName)
         {
             try
             {
-                _references.Delete("Countries", Request.Form);
+                _references.Delete(tableName, Request.Form);
                 return Json(ModelState.ToDataSourceResult());
             }
             catch (Exception ex)
@@ -92,16 +75,25 @@ namespace KendoUIMVC5.Controllers
             }
         }
 
-        public ActionResult Add([DataSourceRequest] DataSourceRequest request)
+        public ActionResult Add([DataSourceRequest] DataSourceRequest request, string tableName)
         {
             try
             {
-                _references.Add("Countries", Request.Form);
+                _references.Add(tableName, Request.Form);
                 return Json(ModelState.ToDataSourceResult());
             }
             catch (Exception ex)
             {
                 return this.Json(new DataSourceResult() { Errors = ex.Message });
+            }
+        }
+
+        private string SelectedTableName
+        {
+            get
+            {
+                string name = Request.Form["cboListOfReferenceTables"];
+                return string.IsNullOrEmpty(name) ? _references.Table.First().Name : name;
             }
         }
     }

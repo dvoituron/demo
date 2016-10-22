@@ -42,5 +42,11 @@
       IF @@ROWCOUNT=0
       INSERT INTO CountryTranslate (CountryCode, Label, LanguageCode, CreatedBy) VALUES(@CountryCode, @Dutch,   'NL', 'Admin')
     </insert>
-  </table>  
+  </table>
+  <table name="Nationalities">
+    <identifier>Code</identifier>
+    <select>
+      SELECT Code FROM Nationality
+    </select>
+  </table>
 </tables>
