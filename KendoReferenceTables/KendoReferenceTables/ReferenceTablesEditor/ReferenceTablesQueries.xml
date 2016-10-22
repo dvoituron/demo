@@ -1,7 +1,11 @@
 ﻿<?xml version="1.0" encoding="utf-8" ?>
+
+<!-- Define a table.name to display in the UI -->
+<!-- Use column names (or aliases) from the SELECT command, into the UPDATE, INSERT OR DELETE commands as parameters -->
+
 <tables>
-  <!-- Define a table.name to display in the UI -->
-  <!-- Use column names (or aliases) from the SELECT command, into the UPDATE, INSERT OR DELETE commands as parameters -->
+
+  <!-- *** Countries *** -->
   <table name="Countries">
     <identifier>CountryCode</identifier>
     <select>
@@ -21,8 +25,8 @@
       UPDATE Country SET DeletedDate = GETDATE() WHERE Code = @CountryCode
       UPDATE CountryTranslate SET DeletedDate = GETDATE() WHERE CountryCode = @CountryCode
     </delete>
-    <!-- IF @@ROWCOUNT=0... https://blogs.msdn.microsoft.com/miah/2008/02/17/sql-if-exists-update-else-insert/ -->
     <insert>
+      -- https://blogs.msdn.microsoft.com/miah/2008/02/17/sql-if-exists-update-else-insert/
       UPDATE Country SET DeletedDate = NULL WHERE Code = @CountryCode
       IF @@ROWCOUNT=0
       INSERT INTO Country (Code, CreatedBy) VALUES(@CountryCode, 'Admin')
@@ -43,10 +47,61 @@
       INSERT INTO CountryTranslate (CountryCode, Label, LanguageCode, CreatedBy) VALUES(@CountryCode, @Dutch,   'NL', 'Admin')
     </insert>
   </table>
+
+  <!-- *** Nationalities *** -->
   <table name="Nationalities">
     <identifier>Code</identifier>
     <select>
       SELECT Code FROM Nationality
     </select>
   </table>
+
+  <!-- *** Contracts *** -->
+  <table name="Contracts">
+    <identifier>Code</identifier>
+    <select>
+      SELECT Code FROM Nationality
+    </select>
+  </table>
+
+  <!-- *** Educations *** -->
+  <table name="Educations">
+    <identifier>Code</identifier>
+    <select>
+      SELECT Code FROM Nationality
+    </select>
+  </table>
+
+  <!-- *** LanguageLevels *** -->
+  <table name="LanguageLevels">
+    <identifier>Code</identifier>
+    <select>
+      SELECT Code FROM Nationality
+    </select>
+  </table>
+
+  <!-- *** Languages *** -->
+  <table name="Languages">
+    <identifier>Code</identifier>
+    <select>
+      SELECT Code FROM Nationality
+    </select>
+  </table>
+
+  <!-- *** Nationalities *** -->
+  <table name="Nationalities">
+    <identifier>Code</identifier>
+    <select>
+      SELECT Code FROM Nationality
+    </select>
+  </table>
+
+  <!-- *** TrainingCertificateLevel *** -->
+  <table name="TrainingCertificateLevel">
+    <identifier>Code</identifier>
+    <select>
+      SELECT Code FROM Nationality
+    </select>
+  </table>
+  
 </tables>
