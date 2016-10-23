@@ -34,6 +34,16 @@ namespace KendoUIMVC5.Controllers
             return Json(_references.Table.Select(t => t.Name), JsonRequestBehavior.AllowGet);
         }
 
+        public PartialViewResult ReferenceTableGrid()
+        {
+            var model = new ReferenceTablesModel()
+            {
+                SelectedTableName = this.SelectedTableName,
+                DataTable = _references.Read(this.SelectedTableName)
+            };
+            return this.PartialView("ReferenceTablesGrid", model);
+        }
+
         public ActionResult Index()
         {
             var model = new ReferenceTablesModel()
